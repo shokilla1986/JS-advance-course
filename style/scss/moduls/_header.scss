@@ -1,0 +1,45 @@
+//стили для header
+
+header{
+   background-color: black;
+}
+
+.header__container{
+   display: flex;
+   justify-content: space-between;
+  
+
+
+   &__left {
+      padding: 30px;
+
+      & a {
+         text-decoration: none;
+         color: white;
+
+         &:hover{
+            color: yellow;
+         }
+      }
+   }
+
+   &__right {
+      padding: 30px;
+   }
+}
+
+.cart__button{
+   padding: 5px;
+   border-radius: 6px;
+   border-color: transparent;
+
+   &:hover{
+      cursor: pointer;
+      background-color: yellow;
+      transition: 1s;
+   }
+
+   &:active {
+      background-color: blue;
+   }
+}

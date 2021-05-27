@@ -1,0 +1,27 @@
+//общие стили для сайта
+*{
+   margin: 0;
+   padding: 0;
+}
+
+body{
+   min-height: 100vh;
+   display: grid;
+   grid-template-rows: auto 1fr  min-content;
+}
+
+.container{
+      max-width: 1140px;
+      width: 100%;
+      margin: 0 auto;
+}
+
+
+//подключаем модули для общих разделов
+
+@import "scss/moduls/header";
+
+
+//подключаем стиль для products
+@import "scss/moduls/products";
+
