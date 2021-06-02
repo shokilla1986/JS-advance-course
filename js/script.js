@@ -1,25 +1,91 @@
 
-//создаем массив с объектами
-const products = [
-   { id: 1, title: 'Notebook', price: 2000, img: "image\item__image\item_1.jpeg" },
-   { id: 2, title: 'Mouse', price: 20, img: '/image/item__image/item_2' },
-   { id: 3, title: 'Keyboard', price: 200, img: '../../image/item__image/item_3' },
-   { id: 4, title: 'Gamepad', price: 50, img: '../image/item__image/item_4' },
-];
+//создаем массив с объект
+class ProductsList {
+   constructor(container = '.products') {
+      this.container = container;
+      this.goods = [];
+      this.allProducts = [];
+      this._fetchProducts();
+   }
 
-//Функция для формирования верстки каждого товара
-const renderProduct = (product) => {
-   return `<div class="product__item">
-               <img scr="${product.img}" alt="картинка">
-               <h3>${product.title}</h3>
-               <p>${product.price}</p>
-               <button class="buy__btn">Купить</button>
-           </div>`
-};
+   _fetchProducts() {
+      this.goods = [
+         { id: 1, title: 'Notebook', price: 2000 },
+         { id: 2, title: 'Mouse', price: 20 },
+         { id: 3, title: 'Keyboard', price: 200 },
+         { id: 4, title: 'Gamepad', price: 50 },
+      ];
+   }
+   render() {
+      const block = document.querySelector(this.container);
+      for (let product of this.goods) {
+         const productObj = new ProductItem(product);
+         this.allProducts.push(productObj);
+         block.insertAdjacentHTML('beforeend', productObj.render())
+      }
+   }
+   getSum() {
+      /*let sum = 0;
+      for(let product of this.goods){
+          sum += product.price;
+      }*/
+      //reduce используется для последовательной обработки каждого элемента массива с сохранением промежуточного результата.
 
-//функция , которая добавляет в файл html
-const renderPage = list => {
-   document.querySelector('.products').innerHTML = list.map(item => renderProduct(item)).join("");
-};
-//запускаем функцию
-renderPage(products);
+      let sum = 0;
+      this.goods.forEach(function (item) {
+         sum += item.price;
+      });
+      alert(sum);
+
+      // let res = this.allProducts.reduce((sum, item) => sum += item.price, 0);
+      // alert(res);
+   }
+}
+
+
+class ProductItem {
+   constructor(product, img = 'https://placehold.it/200x150') {
+      this.title = product.title;
+      this.price = product.price;
+      this.id = product.id;
+      this.img = img;
+
+   }
+
+   render() {
+      return `<div class="product-item" data-id="${this.id}">
+              <img src="${this.img}" alt="Some img">
+              <h3>${this.title}</h3>
+              <p>${this.price}</p>
+              <button class="buy-btn">Купить</button>
+          </div>`
+   }
+}
+
+let list = new ProductsList();
+list.render();
+list.getSum();
+
+//добавляем пустые классы для корзины
+
+class Cart {
+
+   addGoods() {
+
+   }
+   deleteGoods() {
+
+   }
+
+   payGoods() {
+
+   }
+
+
+
+}
+
+class ElemCart {
+
+}
+
