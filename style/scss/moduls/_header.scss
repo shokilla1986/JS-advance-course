@@ -7,7 +7,7 @@ header{
 .header__container{
    display: flex;
    justify-content: space-between;
-  
+   position: relative;
 
 
    &__left {
@@ -28,6 +28,25 @@ header{
    }
 }
 
+.cart{
+   position: absolute;
+   right: 0;
+   top: 90px;
+   display: flex;
+   flex-direction: column;   
+   width: 40%;
+   background-color: yellow;
+}
+
+.close {
+   display: none;
+}
+
+.open {
+   display: block;
+}
+
+//стиль для кнопки корзины
 .cart__button{
    padding: 5px;
    border-radius: 6px;
@@ -42,4 +61,15 @@ header{
    &:active {
       background-color: blue;
    }
+}
+
+
+//стили для блоков корзины
+.cart__item{
+   display: flex;
+   flex-direction: column;
+   width: 90%;
+   align-items: center;
+   gap: 10px;
+   border: 1px solid black;
 }
