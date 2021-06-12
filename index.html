@@ -2,31 +2,77 @@
 <html lang="en">
 
 <head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Internet-Shop</title>
-   <link rel="stylesheet" href="style/style.css">
+    <meta charset="UTF-8">
+    <title>Интернет-магазин</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-   <header>
-      <div class="container header__container">
-         <div class="header__container__left">
-            <a href="#">I-shop</a>
-         </div>
+    <div id="app">
+        <header>
+            <div class="logo">E-shop</div>
+            <div class="cart">
+                <form action="#" class="search-form" @submit="filter">
+                    <input type="text" class="search-field" v-model="userSearch">
+                    <button class="btn-search" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                <button class="btn-cart" type="button" @click="show = !show">Корзина</button>
+                <div class="cart-block" v-show="show">
+                    <div class="cart-item" v-for="item of cart">
+                        <div class="product-cart">
+                            <img :src="imgCatalog" alt="image">
+                            <div class="product-cart-info">
+                                <div>{{ item.product_name }}</div>
+                                <div>{{ item.price}}</div>
+                                <div>Quantity: {{quantity}}</div>
+                            </div>
+                            <div class="right-block">
+                                <div>{{item.quantity * item.price}}</div>
+                                <button class="del-btn" @click="remove(item)">&times;</button>
+                            </div>
+                        </div>
 
-         <div class="header__container__right">
-            <button class="cart__button" type="button">Корзина</button>
-         </div>
-      </div>
-   </header>
+                    </div>
 
-   <main>
-      <div class="container products"></div>
-   </main>
-
-   <script src="js/script.js"></script>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="products">
+                <div class="product-item" v-for="product of filtered">
+                    <img :src="imgCatalog" alt="Some img">
+                    <div class="desc">
+                        <h3>{{product.product_name}}</h3>
+                        <p>{{product.price}} $</p>
+                        <button class="buy-btn" @click="addProduct(product)">Купить</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"
+        integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
+
+<!--<div class="cart-item" data-id="${this.id_product}">-->
+<!--<div class="product-bio">-->
+<!--<img src="${this.img}" alt="Some image">-->
+<!--<div class="product-desc">-->
+<!--<p class="product-title">${this.product_name}</p>-->
+<!--<p class="product-quantity">Quantity: ${this.quantity}</p>-->
+<!--<p class="product-single-price">$${this.price} each</p>-->
+<!--</div>-->
+<!--</div>-->
+<!--<div class="right-block">-->
+<!--<p class="product-price">${this.quantity*this.price}</p>-->
+<!--<button class="del-btn" data-id="${this.id_product}">&times;</button>-->
+<!--</div>-->
+<!--</div>-->
