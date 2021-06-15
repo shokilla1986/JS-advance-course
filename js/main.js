@@ -1,75 +1,88 @@
+//Отправляйте свои данные с помощью $emit в верхний компонент, а вниз с помощью props
 const API = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
 const app = new Vue({
     el: '#app',
     data: {
-        catalogUrl: '/catalogData.json',
-        products: [],
-        imgCatalog: 'https://via.placehold.it/200x150',
         userSearch: '',
+        showCart: false,
+        catalogUrl: '/catalogData.json',
+        cartUrl: '/getBasket.json',
+        cartItems: [],
         filtered: [],
-        show: false,
-        cartUrl: "/getBasket.json",
-        cart: [],
+        imgCart: 'https://placehold.it/50x100',
+        products: [],
+        imgProduct: 'https://placehold.it/200x150',
+        error: false
     },
     methods: {
-        getJson(url) {//делаем запрос на сервер и получаем json
+        getJson(url) {
             return fetch(url)
                 .then(result => result.json())
-                .catch(error => {
-                    console.log(error);
+                .catch(error => alert("Danger"))
+        },
+        addProduct(item) {
+            this.getJson(`${API}/addToBasket.json`)
+                .then(data => {
+                    if (data.result === 1) {
+                        let find = this.cartItems.find(el => el.id_product === item.id_product);
+                        if (find) {
+                            find.quantity++;
+                        } else {
+                            const prod = Object.assign({ quantity: 1 }, item);
+                            this.cartItems.push(prod)
+                        }
+                    }
                 })
         },
-        addProduct(product) {//метод добавления товара в корзину
-            let find = this.cart.find(el => el.id_product === product.id_product);//обходим массив корзины, find возвращает объект товара
-            if (find) {//если находит то увеличиваем количество
-                find.quantity++;
-            } else {//если нет, создаем объект товара корзины. Метод assing взял с разбора на уроке, сам такого не знаю
-                let item = Object.assign({ quantity: 1 }, product);//создание нового объекта на основе двух, указанных в параметрах
-                this.cart.push(item)
-            }
+
+        remove(item) {
+            this.getJson(`${API}/addToBasket.json`)
+                .then(data => {
+                    if (data.result === 1) {
+                        if (item.quantity > 1) {
+                            item.quantity--;
+                        } else {
+                            this.cartItems.splice(this.cartItems.indexOf(item), 1);
+                        }
+                    }
+
+                })
         },
-        remove(item) {//метод удаления товара с корзины
-            let find = this.cart.find(el => el.id_product === item.id_product);//ищем товар в корзине
-            if (item.quantity > 1) {//если количество больше, уменьшаем
-                item.quantity--;
-            } else {//если 1, удаляем из массива с помощью метода массива splice, 1 -это количество индесов удаления
-                this.cart.splice(this.cart.indexOf(item), 1);
-            }
-        },
-        filter() {//метод поиска товаров
-            let regexp = new RegExp(this.userSearch, 'i');//передаем в переменную введенное значение без учета регистра
-            this.filtered = this.products.filter(el => regexp.test(el.product_name));//в массиве фильтра ищем товары, с помощью test ,у которыч название содержит введенные знаачения
+        filter() {
+            let regexp = new RegExp(this.userSearch, 'i');
+            this.filtered = this.products.filter(el => regexp.test(el.product_name));
         }
     },
-    mounted() {//аналог windiws.onload
-        this.getJson(`${API + this.catalogUrl}`)
-            .then(data => {
-                for (let el of data) {
-                    this.products.push(el);
-                    this.filtered.push(el);
-                }
-            });
-        this.getJson(`getProducts.json`)
-            .then(data => {
-                for (let el of data) {
-                    this.products.push(el);
-                    this.filtered.push(el);
-                }
-            })
+    mounted() {
         this.getJson(`${API + this.cartUrl}`)
             .then(data => {
-                for (let el of data.contents) {
-                    this.cart.push(el);
+                for (let item of data.contents) {
+                    this.$data.cartItems.push(item);
                 }
             });
+        this.getJson(`${API + this.catalogUrl}`)
+            .then(data => {
+                for (let item of data) {
+                    this.$data.products.push(item);
+                    this.$data.filtered.push(item);
+                }
+            });
+        /*this.getJson(`getProducts.json`)
+            .then(data => {
+                for(let item of data){
+                    this.$data.products.push(item);
+                    this.$data.filtered.push(item);
+                }
+            })*/
     }
-})
+
+});
+
 
 // class List {
-//     constructor(url, container, list = list2){
+//     constructor(url, container){
 //         this.container = container;
-//         this.list = list;
 //         this.url = url;
 //         this.goods = [];
 //         this.allProducts = [];
@@ -79,22 +92,19 @@ const app = new Vue({
 //     getJson(url){
 //         return fetch(url ? url : `${API + this.url}`)
 //             .then(result => result.json())
-//             .catch(error => {
-//                 console.log(error);
-//             })
-//     }
-//     handleData(data){
-//         this.goods = [...data];
-//         this.render();
+//             .catch(error => console.log(error))
 //     }
 //     calcSum(){
 //         return this.allProducts.reduce((accum, item) => accum += item.price, 0);
 //     }
+//     handleData(data){
+//         this.goods = data;
+//         this.render();
+//     }
 //     render(){
 //         const block = document.querySelector(this.container);
 //         for (let product of this.goods){
-//             const productObj = new this.list[this.constructor.name](product);
-//             console.log(productObj);
+//             const productObj = new list[this.constructor.name](product);
 //             this.allProducts.push(productObj);
 //             block.insertAdjacentHTML('beforeend', productObj.render());
 //         }
@@ -115,31 +125,36 @@ const app = new Vue({
 //         return false
 //     }
 // }
-//
-// class Item{
+// class Item {
 //     constructor(el, img = 'https://placehold.it/200x150'){
 //         this.product_name = el.product_name;
 //         this.price = el.price;
-//         this.id_product = el.id_product;
 //         this.img = img;
+//         this.id_product = el.id_product
 //     }
+//
 //     render(){
 //         return `<div class="product-item" data-id="${this.id_product}">
-//                 <img src="${this.img}" alt="Some img">
-//                 <div class="desc">
-//                     <h3>${this.product_name}</h3>
-//                     <p>${this.price} $</p>
-//                     <button class="buy-btn"
-//                     data-id="${this.id_product}"
-//                     data-name="${this.product_name}"
-//                     data-price="${this.price}">Купить</button>
-//                 </div>
-//             </div>`
+//                     <img src="${this.img}" alt="Some img">
+//                     <div class="desc">
+//                         <h3>${this.product_name}</h3>
+//                         <p>${this.price} $</p>
+//                         <button class="buy-btn"
+//                         data-id="${this.id_product}"
+//                         data-price="${this.price}"
+//                         data-name="${this.product_name}"
+//                         data-img="${this.img}">
+//                         Купить
+// </button>
+//                     </div>
+//                 </div>`;
+//
 //     }
 // }
 //
-// class ProductsList extends List{
-//     constructor(cart, container = '.products', url = "/catalogData.json"){
+//
+// class ProductsList extends List {
+//     constructor(cart, url = '/catalogData.json',container = '.products'){
 //         super(url, container);
 //         this.cart = cart;
 //         this.getJson()
@@ -153,21 +168,17 @@ const app = new Vue({
 //         });
 //         document.querySelector('.search-form').addEventListener('submit', e => {
 //             e.preventDefault();
-//             this.filter(document.querySelector('.search-field').value)
+//             this.filter(document.querySelector('.search-field').value);
 //         })
 //     }
 // }
 //
-//
-// class ProductItem extends Item{}
-//
+// class Product extends Item{}
 // class Cart extends List{
-//     constructor(container = ".cart-block", url = "/getBasket.json"){
+//     constructor(url = '/getBasket.json', container = '.cart-block'){
 //         super(url, container);
 //         this.getJson()
-//             .then(data => {
-//                 this.handleData(data.contents);
-//             });
+//             .then(data => this.handleData(data.contents));
 //     }
 //     addProduct(element){
 //         this.getJson(`${API}/addToBasket.json`)
@@ -189,7 +200,7 @@ const app = new Vue({
 //                         this.render();
 //                     }
 //                 } else {
-//                     alert('Error');
+//                     alert('Error')
 //                 }
 //             })
 //     }
@@ -207,26 +218,25 @@ const app = new Vue({
 //                         document.querySelector(`.cart-item[data-id="${productId}"]`).remove();
 //                     }
 //                 } else {
-//                     alert('Error');
+//                     alert('Error')
 //                 }
 //             })
 //     }
 //     _updateCart(product){
-//        let block = document.querySelector(`.cart-item[data-id="${product.id_product}"]`);
-//        block.querySelector('.product-quantity').textContent = `Quantity: ${product.quantity}`;
-//        block.querySelector('.product-price').textContent = `$${product.quantity*product.price}`;
+//         const block = document.querySelector(`.cart-item[data-id="${product.id_product}"]`);
+//         block.querySelector(`.product-quantity`).textContent = `Quantity: ${product.quantity}`;
+//         block.querySelector(`.product-price`).textContent = `$${product.quantity*product.price}`;
 //     }
 //     _init(){
-//         document.querySelector('.btn-cart').addEventListener('click', () => {
-//             document.querySelector(this.container).classList.toggle('invisible');
-//         });
 //         document.querySelector(this.container).addEventListener('click', e => {
-//            if(e.target.classList.contains('del-btn')){
-//                this.removeProduct(e.target);
-//            }
+//             if(e.target.classList.contains('del-btn')){
+//                 this.removeProduct(e.target);
+//             }
+//         });
+//         document.querySelector('.btn-cart').addEventListener('click', () => {
+//             document.querySelector(this.container).classList.toggle('invisible')
 //         })
 //     }
-//
 // }
 //
 // class CartItem extends Item{
@@ -235,28 +245,37 @@ const app = new Vue({
 //         this.quantity = el.quantity;
 //     }
 //     render(){
-//     return `<div class="cart-item" data-id="${this.id_product}">
-//             <div class="product-bio">
-//             <img src="${this.img}" alt="Some image">
-//             <div class="product-desc">
+//         return `<div class="cart-item" data-id="${this.id_product}">
+//     <div class="product-bio">
+//         <img src="${this.img}" alt="Some image">
+//         <div class="product-desc">
 //             <p class="product-title">${this.product_name}</p>
 //             <p class="product-quantity">Quantity: ${this.quantity}</p>
-//         <p class="product-single-price">$${this.price} each</p>
+//             <p class="product-single-price">$${this.price} each</p>
 //         </div>
-//         </div>
-//         <div class="right-block">
-//             <p class="product-price">$${this.quantity*this.price}</p>
-//             <button class="del-btn" data-id="${this.id_product}">&times;</button>
-//         </div>
-//         </div>`
+//     </div>
+//     <div class="right-block">
+//         <p class="product-price">${this.quantity*this.price}</p>
+//         <button class="del-btn" data-id="${this.id_product}">&times;</button>
+//     </div>
+// </div>`
 //     }
 // }
-// const list2 = {
-//     ProductsList: ProductItem,
+//
+// const list = {
+//     ProductsList: Product,
 //     Cart: CartItem
 // };
 //
-// let cart = new Cart();
-// let products = new ProductsList(cart);
-// products.getJson(`getProducts.json`).then(data => products.handleData(data));
+//
+// const cart = new Cart();
+// const products = new ProductsList(cart);
+// setTimeout(() => {
+//     products.getJson(`getProducts.json`).then(data => products.handleData(data));
+// }, 300);
+
+// list.getProducts(() => {
+//     list.render();
+// });
+
 
